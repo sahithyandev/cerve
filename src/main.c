@@ -2,9 +2,14 @@
 #include <string.h>
 
 #include "./help.c"
+#include "./serve.c"
 
 int main(int argc, char **argv) {
-  if (argc == 1 || strcmp("help", argv[1]) == 0) {
+  if (argc == 1) {
+    start_server();
+    return 0;
+  }
+  if (strcmp("help", argv[1]) == 0) {
     subcmd_help();
     return 0;
   }
