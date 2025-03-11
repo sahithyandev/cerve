@@ -6,7 +6,7 @@
 
 int main(int argc, char **argv) {
   if (argc == 1) {
-    start_server();
+    subcmd_serve();
     return 0;
   }
   if (strcmp("help", argv[1]) == 0) {

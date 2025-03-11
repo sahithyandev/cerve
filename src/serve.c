@@ -4,10 +4,52 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 #define MESSAGE_BUFFER_SIZE 100
 
-int start_server() {
+struct AcceptedClient {
+  struct sockaddr client_address;
+  int client_socket_fd; // or the error no
+  bool isAccepted;
+};
+
+struct AcceptedClient* accept_incoming_connection(const int server_socket_fd) {
+  struct sockaddr client_address;
+  socklen_t client_address_size = sizeof(struct sockaddr);
+  int client_socket_fd = accept(server_socket_fd, &client_address, &client_address_size);
+
+  struct AcceptedClient* accepted_client = malloc(sizeof (struct AcceptedClient));
+  accepted_client->client_address = client_address;
+  accepted_client->client_socket_fd = client_socket_fd;
+  accepted_client->isAccepted = client_socket_fd > 0;
+
+  return accepted_client;
+}
+
+void respond_to_client(const struct AcceptedClient* accepted_client) {
+  char buffer[MESSAGE_BUFFER_SIZE];
+  while (true) {
+    ssize_t numberOfBytesReceived = recv(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE, 0);
+    printf("Received: %ld\n", numberOfBytesReceived);
+    if (numberOfBytesReceived == -1) {
+        printf("Error occurred while receiving data from client");
+    } else {
+      // buffer[numberOfBytesReceived] = 0;
+      printf("Message: %s", buffer);
+    }
+  }
+}
+
+pthread_t create_thread_for_client(struct AcceptedClient* accepted_client) {
+  pthread_t thread;
+  pthread_create(&thread, NULL, respond_to_client, accepted_client);
+  printf("Created a thread for client\n");
+
+  return thread;
+}
+
+int subcmd_serve() {
 
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -24,7 +66,7 @@ int start_server() {
   int result = bind(socket_fd, &address, sizeof address);
 
   if (result != 0) {
-    printf("Couldn't connect to the socket. Closing the socket... (%d)\n", result);
+    printf("Couldn't bind to the socket. Closing the socket...\n");
     int closed_status = close(socket_fd);
     if (closed_status == 0) {
       printf("Closed the socket\n");
@@ -49,28 +91,14 @@ int start_server() {
 
   printf("Started the listening on http://localhost:%d\n", listening_port);
 
-  struct sockaddr_in client_address;
-  int client_address_size = sizeof(struct sockaddr_in);
-  int client_socket_fd = accept(socket_fd, &client_address, &client_address_size);
-
-  if (client_socket_fd < 0) {
-    printf("Couldn't establish connection with client.\n");
-    exit(1);
-  }
-
-  char buffer[MESSAGE_BUFFER_SIZE];
   while (true) {
-    ssize_t numberOfBytesReceived = recv(client_socket_fd, buffer, MESSAGE_BUFFER_SIZE, 0);
-    if (numberOfBytesReceived == -1) {
-        printf("Error occurred while receiving data from client");
-    } else {
-      buffer[numberOfBytesReceived] = 0;
-      printf("Message == %s\n", buffer);
+    struct AcceptedClient* accepted_client = accept_incoming_connection(socket_fd);
+    if (!accepted_client->isAccepted) {
+      printf("Couldn't establish connection with client.\n");
+      continue;
     }
+   create_thread_for_client(accepted_client);
   }
-
-  close(client_socket_fd);
   shutdown(socket_fd, SHUT_RDWR);
-
   return 0;
 }
