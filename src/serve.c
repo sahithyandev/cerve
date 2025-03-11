@@ -50,26 +50,36 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
     }
 
     if (numberOfBytesReceived == -1) {
-        printf("Error occurred while receiving data from client");
+        printf("Error occurred while receiving data from client\n");
         continue;
+    }
+    if (numberOfBytesReceived == 0) {
+      break;
     }
     buffer[numberOfBytesReceived] = 0;
     printf("%s", buffer);
     char *method = strtok(buffer, " ");
     char *path = strtok(NULL, " ");
 
-    *response = "";
+    printf(":: %s %s\n", method, path);
+
+    char response_message[512];
+    sprintf(response_message, "You requested %s %s\r\n", method, path);
+    int response_length = strlen(response_message);
     sprintf(response,
-      "HTTP/1.1 200 Ok\r\n"
-      "Content-Type: text/plaintext\r\n"
+      "HTTP/1.1 200 OK\r\n"
+      "Content-Type: text/plain\r\n"
+      "Content-length: %d\r\n"
       "\r\n"
-      "You requested %s %s", method, path);
+      "%s", response_length, response_message);
+
     int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
 
     if (sent_bytes == -1) {
       perror("Error sending message to client");
     }
   }
+  return NULL;
 }
 
 void create_thread_for_client(struct AcceptedClient* accepted_client) {
