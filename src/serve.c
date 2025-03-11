@@ -32,17 +32,18 @@ struct AcceptedClient* accept_incoming_connection() {
 
 void* respond_to_client(const struct AcceptedClient* accepted_client) {
   char buffer[MESSAGE_BUFFER_SIZE];
+  char response[MESSAGE_BUFFER_SIZE];
+
   while (true) {
     ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE);
-    printf("Received: %ld\n", numberOfBytesReceived);
 
     if (numberOfBytesReceived == MESSAGE_BUFFER_SIZE) {
       sprintf(buffer,
-        "HTTP 1.1 413 Request Entity Too Large\r\n"
+        "HTTP/1.1 413 Request Entity Too Large\r\n"
         "Content-Type: text/plaintext\r\n"
         "\r\n"
         "Maximum request size accepted by Cerve is %d bytes.", MESSAGE_BUFFER_SIZE);
-      write(accepted_client->client_socket_fd, buffer, strlen(buffer));
+      send(accepted_client->client_socket_fd, buffer, strlen(buffer), 0);
       close(accepted_client->client_socket_fd);
       free(accepted_client);
       return NULL;
@@ -50,27 +51,42 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
 
     if (numberOfBytesReceived == -1) {
         printf("Error occurred while receiving data from client");
-    } else {
-      // buffer[numberOfBytesReceived] = 0;
-      printf("Message: %s", buffer);
+        continue;
+    }
+    buffer[numberOfBytesReceived] = 0;
+    printf("%s", buffer);
+    char *method = strtok(buffer, " ");
+    char *path = strtok(NULL, " ");
+
+    *response = "";
+    sprintf(response,
+      "HTTP/1.1 200 Ok\r\n"
+      "Content-Type: text/plaintext\r\n"
+      "\r\n"
+      "You requested %s %s", method, path);
+    int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
+
+    if (sent_bytes == -1) {
+      perror("Error sending message to client");
     }
   }
 }
 
-pthread_t create_thread_for_client(struct AcceptedClient* accepted_client) {
+void create_thread_for_client(struct AcceptedClient* accepted_client) {
+  if (!accepted_client->isAccepted) {
+    return;
+  }
   pthread_t thread;
   pthread_create(&thread, NULL, respond_to_client, accepted_client);
   printf("Created a thread for client\n");
-
-  return thread;
 }
 
 static void catch_function(int signal_no) {
   switch (signal_no) {
     case SIGINT:
       printf("\nGracefully shutting down server...\n");
-      close(server_socket_fd);
       shutdown(server_socket_fd, SHUT_RDWR);
+      close(server_socket_fd);
       break;
     default:
       printf("Exiting with error code %d\n", signal_no);
@@ -99,7 +115,7 @@ int subcmd_serve() {
   int result = bind(server_socket_fd, &address, sizeof address);
 
   if (result != 0) {
-    printf("Couldn't bind to the socket. Closing the socket...\n");
+    perror("Couldn't bind to the socket");
     int closed_status = close(server_socket_fd);
     if (closed_status == 0) {
       printf("Closed the socket\n");
