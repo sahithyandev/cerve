@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-#define MESSAGE_BUFFER_SIZE 100
+#define MESSAGE_BUFFER_SIZE 5000
 
 struct AcceptedClient {
   struct sockaddr client_address;
@@ -30,11 +30,24 @@ struct AcceptedClient* accept_incoming_connection() {
   return accepted_client;
 }
 
-void respond_to_client(const struct AcceptedClient* accepted_client) {
+void* respond_to_client(const struct AcceptedClient* accepted_client) {
   char buffer[MESSAGE_BUFFER_SIZE];
   while (true) {
-    ssize_t numberOfBytesReceived = recv(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE, 0);
+    ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE);
     printf("Received: %ld\n", numberOfBytesReceived);
+
+    if (numberOfBytesReceived == MESSAGE_BUFFER_SIZE) {
+      sprintf(buffer,
+        "HTTP 1.1 413 Request Entity Too Large\r\n"
+        "Content-Type: text/plaintext\r\n"
+        "\r\n"
+        "Maximum request size accepted by Cerve is %d bytes.", MESSAGE_BUFFER_SIZE);
+      write(accepted_client->client_socket_fd, buffer, strlen(buffer));
+      close(accepted_client->client_socket_fd);
+      free(accepted_client);
+      return NULL;
+    }
+
     if (numberOfBytesReceived == -1) {
         printf("Error occurred while receiving data from client");
     } else {
