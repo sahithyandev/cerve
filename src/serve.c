@@ -36,7 +36,6 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
 
   while (true) {
     ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE);
-
     if (numberOfBytesReceived == MESSAGE_BUFFER_SIZE) {
       sprintf(buffer,
         "HTTP/1.1 413 Request Entity Too Large\r\n"
@@ -57,7 +56,6 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
       break;
     }
     buffer[numberOfBytesReceived] = 0;
-    printf("%s", buffer);
     char *method = strtok(buffer, " ");
     char *path = strtok(NULL, " ");
 
@@ -88,7 +86,6 @@ void create_thread_for_client(struct AcceptedClient* accepted_client) {
   }
   pthread_t thread;
   pthread_create(&thread, NULL, respond_to_client, accepted_client);
-  printf("Created a thread for client\n");
 }
 
 static void catch_function(int signal_no) {

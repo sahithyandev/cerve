@@ -17,6 +17,12 @@ make
 
 The above commands builds the executable.
 
+## Usage
+
+After following the above steps, the executable is located at `build/cerve`.
+
+`cerve help` will print the subcommands.
+
 ## Authors
 
 Sahithyan Kandathasan (https://sahithyan.dev)
