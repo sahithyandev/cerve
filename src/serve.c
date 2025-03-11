@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <signal.h>
 
 #define MESSAGE_BUFFER_SIZE 100
 
@@ -49,7 +50,22 @@ pthread_t create_thread_for_client(struct AcceptedClient* accepted_client) {
   return thread;
 }
 
+static void catch_function(int signal_no) {
+  switch (signal_no) {
+    case SIGINT:
+      printf("Shutting down server.");
+      break;
+    default:
+      printf("Exiting with error code %d\n", signal_no);
+  }
+  exit(signal_no);
+}
+
 int subcmd_serve() {
+  if (signal(SIGINT, catch_function) == SIG_ERR) {
+    fputs("Error occurred while setting a signal handler.\n",stderr);
+    return EXIT_FAILURE;
+  }
 
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
