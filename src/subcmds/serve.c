@@ -8,6 +8,7 @@
 #include <signal.h>
 
 #include "../utils/fs.c"
+#include "../utils/http.c"
 
 #define MESSAGE_BUFFER_SIZE 5000
 
@@ -42,10 +43,10 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
     ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE);
     if (numberOfBytesReceived == MESSAGE_BUFFER_SIZE) {
       sprintf(buffer,
-        "HTTP/1.1 413 Request Entity Too Large\r\n"
+        "HTTP/1.1 %hi %s\r\n"
         "Content-Type: text/plaintext\r\n"
         "\r\n"
-        "Maximum request size accepted by Cerve is %d bytes.", MESSAGE_BUFFER_SIZE);
+        "Maximum request size accepted by Cerve is %d bytes.", 413, status_code_to_str(413), MESSAGE_BUFFER_SIZE);
       send(accepted_client->client_socket_fd, buffer, strlen(buffer), 0);
       close(accepted_client->client_socket_fd);
       free(accepted_client);
@@ -64,17 +65,24 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
     char *url_segment = strtok(NULL, " ");
     char *file_path = convert_url_segment_to_file_location(url_segment);
 
-    printf(":: %s %s\n", method, url_segment);
+    signed short int status_code = 200;
+
+    if (access(file_path, F_OK) != 0) {
+      // file doesn't exist
+      status_code = 404;
+    }
+
+    printf("%hi:: %s %s\n", status_code, method, url_segment);
 
     char response_message[512];
     sprintf(response_message, "You requested %s %s.\r\n%s is the target file.\r\n", method, url_segment, file_path);
     int response_length = strlen(response_message);
     sprintf(response,
-      "HTTP/1.1 200 OK\r\n"
+      "HTTP/1.1 %hi %s\r\n"
       "Content-Type: text/plain\r\n"
       "Content-length: %d\r\n"
       "\r\n"
-      "%s", response_length, response_message);
+      "%s", status_code, status_code_to_str(status_code), response_length, response_message);
     free(file_path);
 
     int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
