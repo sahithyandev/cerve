@@ -11,6 +11,8 @@
 
 #define MESSAGE_BUFFER_SIZE 5000
 
+extern int LOG_LEVEL;
+
 struct AcceptedClient {
   struct sockaddr client_address;
   int client_socket_fd; // or the error no
