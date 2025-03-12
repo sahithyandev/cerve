@@ -1,6 +1,8 @@
 #include <unistd.h>
+#include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <stdlib.h>
 
 char* normalize_url_segment(char path_segment[]) {
   if (strcmp(path_segment, "/") == 0) {
