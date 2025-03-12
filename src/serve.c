@@ -7,6 +7,8 @@
 #include <pthread.h>
 #include <signal.h>
 
+#include "./fs-utils.c"
+
 #define MESSAGE_BUFFER_SIZE 5000
 
 struct AcceptedClient {
@@ -57,12 +59,13 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
     }
     buffer[numberOfBytesReceived] = 0;
     char *method = strtok(buffer, " ");
-    char *path = strtok(NULL, " ");
+    char *url_segment = strtok(NULL, " ");
+    char *file_path = convert_url_segment_to_file_location(url_segment);
 
-    printf(":: %s %s\n", method, path);
+    printf(":: %s %s\n", method, url_segment);
 
     char response_message[512];
-    sprintf(response_message, "You requested %s %s\r\n", method, path);
+    sprintf(response_message, "You requested %s %s.\r\n%s is the target file.\r\n", method, url_segment, file_path);
     int response_length = strlen(response_message);
     sprintf(response,
       "HTTP/1.1 200 OK\r\n"
@@ -70,6 +73,7 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
       "Content-length: %d\r\n"
       "\r\n"
       "%s", response_length, response_message);
+    free(file_path);
 
     int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
 
