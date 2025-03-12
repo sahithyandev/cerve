@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "./help.c"
-#include "./serve.c"
+#include "./subcmds/help.c"
+#include "./subcmds/serve.c"
 #include "./utils/log_macros.h"
 
 int LOG_LEVEL = LOG_NORMAL;

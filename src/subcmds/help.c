@@ -1,4 +1,5 @@
-#include "config.h"
+#include "../config.h"
+
 #include "./version.c"
 
 void subcmd_help() {

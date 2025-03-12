@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "./utils/fs.c"
+#include "../utils/fs.c"
 
 #define MESSAGE_BUFFER_SIZE 5000
 
