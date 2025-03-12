@@ -119,6 +119,9 @@ int subcmd_serve() {
   address.sin_port = htons(2000);
   inet_pton(AF_INET, "127.0.0.1", &address.sin_addr.s_addr);
 
+  const int opt = 1;
+  setsockopt(server_socket_fd, SOL_SOCKET,SO_REUSEADDR, &opt, sizeof(opt));
+
   int result = bind(server_socket_fd, &address, sizeof address);
 
   if (result != 0) {
