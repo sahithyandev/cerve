@@ -26,5 +26,16 @@ sprintf(response_buffer,
   "Content-length: %lu\r\n"
   "\r\n"
   "%s", status_code, status_code_to_str(status_code), strlen(message), message);
+}
 
+void create_file_response_headers(
+    char* response_buffer,
+    char* file_extension,
+    int file_size
+) {
+  sprintf(response_buffer,
+    "HTTP/1.1 200 %s\r\n"
+    "Content-Type: %s\r\n"
+    "Content-Length: %d\r\n"
+    "\r\n", status_code_to_str(200), file_extension_to_mime(file_extension), file_size);
 }

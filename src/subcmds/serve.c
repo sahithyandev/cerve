@@ -11,6 +11,7 @@
 #include "../utils/http.c"
 
 #define MESSAGE_BUFFER_SIZE 5000
+#define FILE_BUFFER_SIZE 1000
 
 extern int LOG_LEVEL;
 
@@ -35,7 +36,30 @@ struct AcceptedClient* accept_incoming_connection() {
   return accepted_client;
 }
 
-void* respond_to_client(const struct AcceptedClient* accepted_client) {
+void send_file_to_client(int client_socket_fd, char* file_path) {
+    FILE *opened_file = fopen(file_path, "r");
+    char response[FILE_BUFFER_SIZE];
+
+    create_file_response_headers(response, "html", file_size(opened_file));
+    int sent_bytes = send(client_socket_fd, response, strlen(response), 0);
+    if (sent_bytes == -1) {
+      perror("Error sending message to client");
+    }
+
+    if (opened_file == NULL) {
+      perror("Error opening file");
+    }
+    while (fgets(response, FILE_BUFFER_SIZE, opened_file)
+           != NULL) {
+        sent_bytes = send(client_socket_fd, response, strlen(response), 0);
+        if (sent_bytes == -1) {
+          perror("Error sending message to client");
+        }
+    }
+    fclose(opened_file);
+}
+
+void* respond_to_client(struct AcceptedClient* accepted_client) {
   char buffer[MESSAGE_BUFFER_SIZE];
   char response[MESSAGE_BUFFER_SIZE];
 
@@ -70,18 +94,20 @@ void* respond_to_client(const struct AcceptedClient* accepted_client) {
     if (access(file_path, F_OK) != 0) {
       // file doesn't exist
       status_code = 404;
+      create_response(response, status_code, NULL);
+
+      free(file_path);
+      printf("%hi:: %s %s\n", status_code, method, url_segment);
+      int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
+      if (sent_bytes == -1) {
+        perror("Error sending message to client");
+      }
+      continue;
     }
 
+    send_file_to_client(accepted_client->client_socket_fd, file_path);
     printf("%hi:: %s %s\n", status_code, method, url_segment);
-
-    create_response(response, status_code, NULL);
     free(file_path);
-
-    int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
-
-    if (sent_bytes == -1) {
-      perror("Error sending message to client");
-    }
   }
   return NULL;
 }
