@@ -4,4 +4,4 @@
 #define LOG_NORMAL 0
 #define LOG_VERBOSE 1
 
-#endif //LOG_MACROS_H
+#endif // LOG_MACROS_H

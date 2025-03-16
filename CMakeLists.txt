@@ -6,11 +6,11 @@ if (NOT CLANG_FORMAT)
     message(WARNING "clang-format not found. Code formatting target will not be available.")
 else()
     file(GLOB_RECURSE ALL_SOURCE_FILES
-            "*.c"
-            "*.h"
+            "src/*.c"
+            "src/*.h"
     )
     add_custom_target(format
-            COMMAND ${CLANG_FORMAT} -i ${ALL_SOURCE_FILES}
+            COMMAND ${CLANG_FORMAT} -i ${ALL_SOURCE_FILES} --verbose
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Formatting all source files with clang-format..."
     )
