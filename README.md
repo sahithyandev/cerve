@@ -4,8 +4,11 @@ Building a simple HTTP server to learn C.
 
 ## Prerequisites
 
-- CMake v3.31.6
+These programs are required to build cerve. 
 
+- CMake v3.31.6
+- [Cwalk library](https://github.com/likle/cwalk/tree/stable) v1.2.9
+ 
 ## Development
 
 ```bash

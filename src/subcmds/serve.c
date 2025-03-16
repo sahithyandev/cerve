@@ -14,6 +14,7 @@
 #define RESPONSE_BUFFER_SIZE 1000
 
 extern int LOG_LEVEL;
+extern char SERVING_DIR[PATH_MAX];
 
 struct AcceptedClient {
   struct sockaddr client_address;
@@ -86,7 +87,10 @@ void respond_to_client(struct AcceptedClient* accepted_client) {
     buffer[numberOfBytesReceived] = 0;
     char *method = strtok(buffer, " ");
     char *url_segment = strtok(NULL, " ");
-    char *file_path = convert_url_segment_to_file_location(url_segment);
+    url_segment = normalize_url_segment(url_segment);
+
+    char file_path[PATH_MAX];
+    cwk_path_join(SERVING_DIR, url_segment, file_path, sizeof(file_path));
 
     signed short int status_code = 200;
 
@@ -97,7 +101,6 @@ void respond_to_client(struct AcceptedClient* accepted_client) {
       status_code = 404;
       create_response(response, status_code, NULL);
 
-      free(file_path);
       printf("%hi:: %s %s\n", status_code, method, url_segment);
       int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
       if (sent_bytes == -1) {
@@ -108,7 +111,6 @@ void respond_to_client(struct AcceptedClient* accepted_client) {
 
     send_file_to_client(accepted_client->client_socket_fd, file_path);
     printf("%hi:: %s %s\n", status_code, method, url_segment);
-    free(file_path);
   }
 }
 
@@ -179,7 +181,8 @@ int subcmd_serve() {
     exit(1);
   }
 
-  printf("Started listening on http://localhost:%d\n", listening_port);
+  printf("Serving...\nListening on: http://localhost:%d\n", listening_port);
+  printf("Serving: %s\n", SERVING_DIR);
 
   while (true) {
     struct AcceptedClient* accepted_client = accept_incoming_connection();
