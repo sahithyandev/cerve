@@ -174,7 +174,7 @@ int subcmd_serve() {
   const int listening_port = ntohs(address.sin_port);
   const int listen_status = listen(server_socket_fd, 10);
   if (listen_status != 0) {
-    printf("Couldn't listen on port %d. Closing the socket...\n", listening_port);
+    fprintf(stderr, "Couldn't listen on port %d. Closing the socket...\n", listening_port);
     close_socket();
     exit(1);
   }
@@ -184,7 +184,7 @@ int subcmd_serve() {
   while (true) {
     struct AcceptedClient* accepted_client = accept_incoming_connection();
     if (!accepted_client->isAccepted) {
-      printf("Couldn't establish connection with client.\n");
+      fputs("Couldn't establish connection with client.\n", stderr);
       continue;
     }
    create_thread_for_client(accepted_client);

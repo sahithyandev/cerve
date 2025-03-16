@@ -1,4 +1,4 @@
-char* status_code_to_str(int status_code) {
+char* status_code_to_str(const int status_code) {
   switch (status_code) {
     case 200:
       return "OK";
@@ -13,7 +13,7 @@ char* status_code_to_str(int status_code) {
 
 void create_response(
     char* response_buffer,
-    signed short int status_code,
+    const signed short int status_code,
     const char* message) {
 
   if (message == NULL) {
@@ -31,7 +31,7 @@ sprintf(response_buffer,
 void create_file_response_headers(
     char* response_buffer,
     char* file_extension,
-    int file_size
+    const int file_size
 ) {
   sprintf(response_buffer,
     "HTTP/1.1 200 %s\r\n"

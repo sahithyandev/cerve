@@ -7,7 +7,7 @@
 
 int LOG_LEVEL = LOG_NORMAL;
 
-int main(int argc, char **argv) {
+int main(const int argc, char **argv) {
   if (argc == 1) {
     return subcmd_serve();
   }
@@ -26,6 +26,6 @@ int main(int argc, char **argv) {
   }
 
   printf("Unknown command: %s\n", argv[1]);
-  printf("Run `cerve help` for usage information\n");
+  puts("Run `cerve help` for usage information\n");
   return 0;
 }
