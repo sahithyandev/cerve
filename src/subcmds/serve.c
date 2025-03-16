@@ -120,6 +120,15 @@ void create_thread_for_client(struct AcceptedClient* accepted_client) {
   pthread_create(&thread, NULL, respond_to_client, accepted_client);
 }
 
+void close_socket() {
+    const int closed_status = close(server_socket_fd);
+    if (closed_status == 0) {
+      printf("Closed the socket\n");
+    } else {
+      perror("Couldn't close the socket\n");
+    }
+}
+
 static void catch_function(int signal_no) {
   switch (signal_no) {
     case SIGINT:
@@ -154,33 +163,23 @@ int subcmd_serve() {
   const int opt = 1;
   setsockopt(server_socket_fd, SOL_SOCKET,SO_REUSEADDR, &opt, sizeof(opt));
 
-  int result = bind(server_socket_fd, &address, sizeof address);
+  const int result = bind(server_socket_fd, &address, sizeof address);
 
   if (result != 0) {
     perror("Couldn't bind to the socket");
-    int closed_status = close(server_socket_fd);
-    if (closed_status == 0) {
-      printf("Closed the socket\n");
-    } else {
-      printf("Couldn't close the socket\n");
-    }
+    close_socket();
     exit(1);
   }
 
-  int listening_port = ntohs(address.sin_port);
-  int listen_status = listen(server_socket_fd, 10);
+  const int listening_port = ntohs(address.sin_port);
+  const int listen_status = listen(server_socket_fd, 10);
   if (listen_status != 0) {
     printf("Couldn't listen on port %d. Closing the socket...\n", listening_port);
-    int closed_status = close(server_socket_fd);
-    if (closed_status == 0) {
-      printf("Closed the socket\n");
-    } else {
-      printf("Couldn't close the socket\n");
-    }
+    close_socket();
     exit(1);
   }
 
-  printf("Started the listening on http://localhost:%d\n", listening_port);
+  printf("Started listening on http://localhost:%d\n", listening_port);
 
   while (true) {
     struct AcceptedClient* accepted_client = accept_incoming_connection();
