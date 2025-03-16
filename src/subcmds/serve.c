@@ -10,8 +10,8 @@
 #include "../utils/fs.c"
 #include "../utils/http.c"
 
-#define MESSAGE_BUFFER_SIZE 5000
-#define FILE_BUFFER_SIZE 1000
+#define REQUEST_BUFFER_SIZE 5000
+#define RESPONSE_BUFFER_SIZE 1000
 
 extern int LOG_LEVEL;
 
@@ -36,9 +36,9 @@ struct AcceptedClient* accept_incoming_connection() {
   return accepted_client;
 }
 
-void send_file_to_client(int client_socket_fd, char* file_path) {
+void send_file_to_client(int client_socket_fd, const char* file_path) {
     FILE *opened_file = fopen(file_path, "r");
-    char response[FILE_BUFFER_SIZE];
+    char response[RESPONSE_BUFFER_SIZE];
 
     create_file_response_headers(response, "html", file_size(opened_file));
     int sent_bytes = send(client_socket_fd, response, strlen(response), 0);
@@ -49,7 +49,7 @@ void send_file_to_client(int client_socket_fd, char* file_path) {
     if (opened_file == NULL) {
       perror("Error opening file");
     }
-    while (fgets(response, FILE_BUFFER_SIZE, opened_file)
+    while (fgets(response, RESPONSE_BUFFER_SIZE, opened_file)
            != NULL) {
         sent_bytes = send(client_socket_fd, response, strlen(response), 0);
         if (sent_bytes == -1) {
@@ -59,22 +59,21 @@ void send_file_to_client(int client_socket_fd, char* file_path) {
     fclose(opened_file);
 }
 
-void* respond_to_client(struct AcceptedClient* accepted_client) {
-  char buffer[MESSAGE_BUFFER_SIZE];
-  char response[MESSAGE_BUFFER_SIZE];
+void respond_to_client(struct AcceptedClient* accepted_client) {
+  char buffer[REQUEST_BUFFER_SIZE];
 
   while (true) {
-    ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd, buffer, MESSAGE_BUFFER_SIZE);
-    if (numberOfBytesReceived == MESSAGE_BUFFER_SIZE) {
+    ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd, buffer, REQUEST_BUFFER_SIZE);
+    if (numberOfBytesReceived == REQUEST_BUFFER_SIZE) {
       sprintf(buffer,
         "HTTP/1.1 %hi %s\r\n"
         "Content-Type: text/plaintext\r\n"
         "\r\n"
-        "Maximum request size accepted by Cerve is %d bytes.", 413, status_code_to_str(413), MESSAGE_BUFFER_SIZE);
+        "Maximum request size accepted by Cerve is %d bytes.", 413, status_code_to_str(413), REQUEST_BUFFER_SIZE);
       send(accepted_client->client_socket_fd, buffer, strlen(buffer), 0);
       close(accepted_client->client_socket_fd);
       free(accepted_client);
-      return NULL;
+      return;
     }
 
     if (numberOfBytesReceived == -1) {
@@ -92,6 +91,8 @@ void* respond_to_client(struct AcceptedClient* accepted_client) {
     signed short int status_code = 200;
 
     if (access(file_path, F_OK) != 0) {
+      char response[RESPONSE_BUFFER_SIZE];
+
       // file doesn't exist
       status_code = 404;
       create_response(response, status_code, NULL);
@@ -109,7 +110,6 @@ void* respond_to_client(struct AcceptedClient* accepted_client) {
     printf("%hi:: %s %s\n", status_code, method, url_segment);
     free(file_path);
   }
-  return NULL;
 }
 
 void create_thread_for_client(struct AcceptedClient* accepted_client) {
