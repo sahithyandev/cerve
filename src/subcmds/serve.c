@@ -41,7 +41,11 @@ void send_file_to_client(int client_socket_fd, const char* file_path) {
     FILE *opened_file = fopen(file_path, "r");
     char response[RESPONSE_BUFFER_SIZE];
 
-    create_file_response_headers(response, "html", file_size(opened_file));
+  char *extension;
+  size_t length;
+  cwk_path_get_extension(file_path, &extension, &length);
+
+    create_file_response_headers(response, extension + 1, file_size(opened_file));
     int sent_bytes = send(client_socket_fd, response, strlen(response), 0);
     if (sent_bytes == -1) {
       perror("Error sending message to client");
