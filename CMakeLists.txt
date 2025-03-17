@@ -27,4 +27,4 @@ configure_file(
 )
 
 add_executable(cerve src/main.c ${CWALK_SOURCES})
-target_link_libraries(cerve cwalk)
+target_include_directories(cerve PRIVATE "${PROJECT_SOURCE_DIR}/lib/cwalk/include")
