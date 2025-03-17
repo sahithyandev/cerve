@@ -10,12 +10,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             artifact_name: cerve-linux
-          - os: windows-latest
-            artifact_name: cerve-windows
           - os: macos-latest
             artifact_name: cerve-macos
 
@@ -44,30 +42,17 @@ jobs:
       - name: Build project
         working-directory: ./build
         shell: bash
-        run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            set VERBOSE=1
-            cmake --build .
-          else
-            VERBOSE=1 cmake --build .
-          fi
+        run: VERBOSE=1 cmake --build .
 
       # Package the executable
       - name: Package executable
         working-directory: ./build
         shell: bash
-        run: |
-          mkdir -p release
-          cp cerve release/
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            7z a release.zip release/*
-          else
-            tar -czvf release.tar.gz release/
-          fi
+        run: tar -czvf release.tar.gz release/
 
       # Upload artifacts for this OS
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: build/release.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
+          path: build/release.tar.gz
