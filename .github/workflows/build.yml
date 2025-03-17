@@ -44,7 +44,7 @@ jobs:
       - name: Build project
         working-directory: ./build
         run: |
-          if [[ "${{ runner.os }}" == "Windows ]]; then
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
             set VERBOSE=1
             cmake --build .
           else
