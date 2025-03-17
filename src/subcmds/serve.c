@@ -29,11 +29,9 @@ int server_socket_fd;
 struct AcceptedClient *accept_incoming_connection() {
 	struct sockaddr client_address;
 	socklen_t client_address_size = sizeof(struct sockaddr);
-	int client_socket_fd =
-		accept(server_socket_fd, &client_address, &client_address_size);
+	int client_socket_fd = accept(server_socket_fd, &client_address, &client_address_size);
 
-	struct AcceptedClient *accepted_client =
-		malloc(sizeof(struct AcceptedClient));
+	struct AcceptedClient *accepted_client = malloc(sizeof(struct AcceptedClient));
 	accepted_client->client_address = client_address;
 	accepted_client->client_socket_fd = client_socket_fd;
 	accepted_client->isAccepted = client_socket_fd > 0;
@@ -49,8 +47,7 @@ void send_file_to_client(int client_socket_fd, const char *file_path) {
 	size_t length;
 	cwk_path_get_extension(file_path, &extension, &length);
 
-	create_file_response_headers(response, extension + 1,
-								 file_size(opened_file));
+	create_file_response_headers(response, extension + 1, file_size(opened_file));
 	int sent_bytes = send(client_socket_fd, response, strlen(response), 0);
 	if (sent_bytes == -1) {
 		perror("Error sending message to client");
@@ -72,8 +69,8 @@ void respond_to_client(struct AcceptedClient *accepted_client) {
 	char buffer[REQUEST_BUFFER_SIZE];
 
 	while (true) {
-		ssize_t numberOfBytesReceived = read(accepted_client->client_socket_fd,
-											 buffer, REQUEST_BUFFER_SIZE);
+		ssize_t numberOfBytesReceived =
+			read(accepted_client->client_socket_fd, buffer, REQUEST_BUFFER_SIZE);
 		if (numberOfBytesReceived == REQUEST_BUFFER_SIZE) {
 			sprintf(buffer,
 					"HTTP/1.1 %hi %s\r\n"
@@ -112,8 +109,7 @@ void respond_to_client(struct AcceptedClient *accepted_client) {
 			create_response(response, status_code, NULL);
 
 			printf("%hi:: %s %s\n", status_code, method, url_segment);
-			int sent_bytes = send(accepted_client->client_socket_fd, response,
-								  strlen(response), 0);
+			int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
 			if (sent_bytes == -1) {
 				perror("Error sending message to client");
 			}
@@ -187,8 +183,7 @@ int subcmd_serve(const int PORT) {
 	const int listening_port = ntohs(address.sin_port);
 	const int listen_status = listen(server_socket_fd, 10);
 	if (listen_status != 0) {
-		fprintf(stderr, "Couldn't listen on port %d. Closing the socket...\n",
-				listening_port);
+		fprintf(stderr, "Couldn't listen on port %d. Closing the socket...\n", listening_port);
 		close_socket();
 		exit(1);
 	}

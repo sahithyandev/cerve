@@ -24,8 +24,7 @@ void create_response(char *response_buffer, const signed short int status_code,
 			"Content-length: %lu\r\n"
 			"\r\n"
 			"%s",
-			status_code, status_code_to_str(status_code), strlen(message),
-			message);
+			status_code, status_code_to_str(status_code), strlen(message), message);
 }
 
 void create_file_response_headers(char *response_buffer, char *file_extension,
@@ -35,6 +34,5 @@ void create_file_response_headers(char *response_buffer, char *file_extension,
 			"Content-Type: %s\r\n"
 			"Content-Length: %d\r\n"
 			"\r\n",
-			status_code_to_str(200), file_extension_to_mime(file_extension),
-			file_size);
+			status_code_to_str(200), file_extension_to_mime(file_extension), file_size);
 }

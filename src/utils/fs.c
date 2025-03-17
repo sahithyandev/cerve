@@ -16,15 +16,13 @@ char *file_extension_to_mime(char file_extension[]) {
 	if (strcmp(file_extension, "css") == 0) {
 		return "text/css";
 	}
-	if (strcmp(file_extension, "js") == 0 ||
-		strcmp(file_extension, "mjs") == 0) {
+	if (strcmp(file_extension, "js") == 0 || strcmp(file_extension, "mjs") == 0) {
 		return "text/javascript";
 	}
 	if (strcmp(file_extension, "json") == 0) {
 		return "application/json";
 	}
-	if (strcmp(file_extension, "jpg") == 0 ||
-		strcmp(file_extension, "jpeg") == 0) {
+	if (strcmp(file_extension, "jpg") == 0 || strcmp(file_extension, "jpeg") == 0) {
 		return "image/jpeg";
 	}
 	if (strcmp(file_extension, "ico") == 0) {
