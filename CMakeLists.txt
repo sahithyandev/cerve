@@ -26,5 +26,11 @@ configure_file(
   @ONLY
 )
 
+# Add cwalk as a separate library
+add_library(cwalk STATIC lib/cwalk/src/cwalk.c)
+target_include_directories(cwalk PUBLIC lib/cwalk/include)
+
+# Add executable and link cwalk
 add_executable(cerve src/main.c ${CWALK_SOURCES})
+target_link_libraries(cerve PRIVATE cwalk)
 target_include_directories(cerve PRIVATE "${PROJECT_SOURCE_DIR}/lib/cwalk/include")
