@@ -41,7 +41,7 @@ jobs:
       # Build the project
       - name: Build project
         working-directory: ./build
-        run: cmake --build . --config Release
+        run: cmake --build .
 
       # Package the executable
       - name: Package executable
