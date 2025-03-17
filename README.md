@@ -21,6 +21,17 @@ make
 
 The above commands builds the executable.
 
+## Release
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+```
+
+The above command builds the executable for release.
+
 ## Usage
 
 After following the above steps, the executable is located at `build/cerve`.
