@@ -65,11 +65,12 @@ void send_file_to_client(int client_socket_fd, const char *file_path) {
 	fclose(opened_file);
 }
 
-void respond_to_client(struct AcceptedClient *accepted_client) {
+void* respond_to_client(void *accepted_client_arg) {
+	struct AcceptedClient *accepted_client = accepted_client_arg;
 	char buffer[REQUEST_BUFFER_SIZE];
 
 	while (true) {
-		ssize_t numberOfBytesReceived =
+		const ssize_t numberOfBytesReceived =
 			read(accepted_client->client_socket_fd, buffer, REQUEST_BUFFER_SIZE);
 		if (numberOfBytesReceived == REQUEST_BUFFER_SIZE) {
 			sprintf(buffer,
@@ -81,7 +82,7 @@ void respond_to_client(struct AcceptedClient *accepted_client) {
 			send(accepted_client->client_socket_fd, buffer, strlen(buffer), 0);
 			close(accepted_client->client_socket_fd);
 			free(accepted_client);
-			return;
+			return NULL;
 		}
 
 		if (numberOfBytesReceived == -1) {
@@ -119,6 +120,7 @@ void respond_to_client(struct AcceptedClient *accepted_client) {
 		send_file_to_client(accepted_client->client_socket_fd, file_path);
 		printf("%hi:: %s %s\n", status_code, method, url_segment);
 	}
+	return NULL;
 }
 
 void create_thread_for_client(struct AcceptedClient *accepted_client) {
