@@ -43,7 +43,13 @@ jobs:
       # Build the project
       - name: Build project
         working-directory: ./build
-        run: VERBOSE=1 cmake --build .
+        run: |
+          if [[ "${{ runner.os }}" == "Windows ]]; then
+            set VERBOSE=1
+            cmake --build .
+          else
+            VERBOSE=1 cmake --build .
+          fi
 
       # Package the executable
       - name: Package executable
