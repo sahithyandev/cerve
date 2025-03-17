@@ -18,7 +18,13 @@ endif()
 
 find_library(CWALK_LIBRARY cwalk)
 if (NOT CWALK_LIBRARY)
-    message(FATAL_ERROR "cwalk library not found!")
+    include(FetchContent)
+    FetchContent_Declare(
+            cwalk
+            GIT_REPOSITORY https://github.com/likle/cwalk.git
+            GIT_TAG v1.2.9
+    )
+    FetchContent_MakeAvailable(cwalk)
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/build")
