@@ -43,6 +43,7 @@ jobs:
       # Build the project
       - name: Build project
         working-directory: ./build
+        shell: bash
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             set VERBOSE=1
@@ -54,9 +55,10 @@ jobs:
       # Package the executable
       - name: Package executable
         working-directory: ./build
+        shell: bash
         run: |
           mkdir -p release
-          cp cerve release/ # Replace 'cerve' with your executable name
+          cp cerve release/
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             7z a release.zip release/*
           else
