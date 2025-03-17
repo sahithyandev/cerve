@@ -48,7 +48,10 @@ jobs:
       - name: Package executable
         working-directory: ./build
         shell: bash
-        run: tar -czvf release.tar.gz release/
+        run: |
+          mkdir -p release
+          cp cerve release
+          tar -czvf release.tar.gz release/
 
       # Upload artifacts for this OS
       - name: Upload artifacts
