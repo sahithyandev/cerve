@@ -23,6 +23,8 @@ jobs:
       # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2
