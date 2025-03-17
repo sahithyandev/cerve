@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cwalk.h>
+
 #include "../utils/fs.c"
 #include "../utils/http.c"
 
@@ -153,7 +155,7 @@ static void catch_function(int signal_no) {
 	exit(signal_no);
 }
 
-int subcmd_serve() {
+int subcmd_serve(const int PORT) {
 	if (signal(SIGINT, catch_function) == SIG_ERR) {
 		fputs("Error occurred while setting a signal handler.\n", stderr);
 		return EXIT_FAILURE;
@@ -168,7 +170,7 @@ int subcmd_serve() {
 
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
-	address.sin_port = htons(2000);
+	address.sin_port = htons(PORT);
 	inet_pton(AF_INET, "127.0.0.1", &address.sin_addr.s_addr);
 
 	const int opt = 1;
