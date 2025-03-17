@@ -2,6 +2,6 @@
 #define CONFIG_H
 
 #define PROJECT_NAME "Cerve"
-#define PROJECT_VERSION "0.0.11"
+#define PROJECT_VERSION "0.0.12"
 
 #endif
