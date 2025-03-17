@@ -22,7 +22,7 @@ jobs:
     steps:
       # Checkout the repository
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2
@@ -57,7 +57,7 @@ jobs:
 
       # Upload artifacts for this OS
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: build/release.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
@@ -68,21 +68,21 @@ jobs:
 
     steps:
       # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       # Download all artifacts from the build jobs
       - name: Download artifacts
-        run: |
-          mkdir -p artifacts
-          gh run download ${{ github.run_id }} -D artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: ${{ matrix.artifact_name }}
+          merge-multiple: true
 
       # Create a GitHub release
       - name: Create GitHub release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -93,7 +93,7 @@ jobs:
 
       # Upload all release assets
       - name: Upload release assets
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -101,6 +101,3 @@ jobs:
           asset_path: artifacts/${{ matrix.artifact_name }}/release.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
           asset_name: ${{ matrix.artifact_name }}.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
           asset_content_type: ${{ runner.os == 'Windows' && 'application/zip' || 'application/gzip' }}
-
-
-
