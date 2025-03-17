@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31.6)
-project(Cerve VERSION 0.0.3)
+project(Cerve VERSION 0.0.4)
 
 find_program(CLANG_FORMAT "clang-format")
 if (NOT CLANG_FORMAT)
@@ -16,16 +16,15 @@ else()
     )
 endif()
 
-find_library(CWALK_LIBRARY cwalk)
-if (NOT CWALK_LIBRARY)
-    include(FetchContent)
-    FetchContent_Declare(
-            cwalk
-            GIT_REPOSITORY https://github.com/likle/cwalk.git
-            GIT_TAG v1.2.9
-    )
-    FetchContent_MakeAvailable(cwalk)
-endif()
+include(FetchContent)
+FetchContent_Declare(
+        cwalk
+        GIT_REPOSITORY https://github.com/likle/cwalk.git
+        GIT_TAG v1.2.9
+)
+FetchContent_MakeAvailable(cwalk)
+
+target_include_directories(cerve PRIVATE ${cwalk_SOURCE_DIR})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/build")
 configure_file(
@@ -35,5 +34,3 @@ configure_file(
 )
 
 add_executable(cerve src/main.c)
-
-target_link_libraries(cerve ${CWALK_LIBRARY})
