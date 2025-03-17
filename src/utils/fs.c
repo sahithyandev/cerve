@@ -3,10 +3,12 @@
 #include <sys/stat.h>
 
 char *normalize_url_segment(char path_segment[]) {
-	if (strcmp(path_segment, "/") == 0) {
-		return "/index.html";
+	char* normalized = malloc(PATH_MAX * sizeof(char));
+	strcpy(normalized, path_segment);
+	if (ends_with(path_segment, "/") == 1) {
+		strcat(normalized, "index.html");
 	}
-	return path_segment;
+	return normalized;
 }
 
 char *file_extension_to_mime(char file_extension[]) {

@@ -9,11 +9,9 @@
 
 #include <cwalk.h>
 
+#include "../utils/common.c"
 #include "../utils/fs.c"
 #include "../utils/http.c"
-
-#define REQUEST_BUFFER_SIZE 5000
-#define RESPONSE_BUFFER_SIZE 1000
 
 extern int LOG_LEVEL;
 extern char SERVING_DIR[PATH_MAX];
@@ -95,21 +93,54 @@ void* respond_to_client(void *accepted_client_arg) {
 		buffer[numberOfBytesReceived] = 0;
 		char *method = strtok(buffer, " ");
 		char *url_segment = strtok(NULL, " ");
-		url_segment = normalize_url_segment(url_segment);
+		char *normalized_url_segment = normalize_url_segment(url_segment);
 
 		char file_path[PATH_MAX];
-		cwk_path_join(SERVING_DIR, url_segment, file_path, sizeof(file_path));
+		cwk_path_join(SERVING_DIR, normalized_url_segment, file_path, sizeof(file_path));
 
 		signed short int status_code = 200;
 
-		if (access(file_path, F_OK) != 0) {
-			char response[RESPONSE_BUFFER_SIZE];
+		char response[RESPONSE_BUFFER_SIZE];
+		if (ends_with(url_segment, "/")) {
+			size_t directory_name_length;
+			cwk_path_get_dirname(file_path, &directory_name_length);
 
+			char directory_name[directory_name_length+1];
+			sprintf(directory_name, "%.*s", (int)directory_name_length, file_path);
+
+			if (access(directory_name, F_OK) == 0) {
+				create_index_page_response(response, directory_name);
+				printf("%hi:: %s %s %s\n", status_code, method, url_segment, "(directory listing)");
+				int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
+				if (sent_bytes == -1) {
+					perror("Error sending message to client");
+				}
+				continue;
+			}
+		}
+
+		strcat(file_path, "/");
+		if (access(file_path, F_OK) == 0) {
+			// directory exist. redirect
+			status_code = 302;
+			strcat(url_segment, "/");
+			create_redirect_response(response, url_segment, status_code);
+			printf("%hi:: %s %s --> %s\n", status_code, method, normalized_url_segment, url_segment);
+			int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
+			if (sent_bytes == -1) {
+				perror("Error sending message to client");
+			}
+			continue;
+		}
+		// remove the last slash
+		file_path[strlen(file_path)-1] = '\0';
+
+		if (access(file_path, F_OK) != 0) {
 			// file doesn't exist
 			status_code = 404;
 			create_response(response, status_code, NULL);
 
-			printf("%hi:: %s %s\n", status_code, method, url_segment);
+			printf("%hi:: %s %s\n", status_code, method, normalized_url_segment);
 			int sent_bytes = send(accepted_client->client_socket_fd, response, strlen(response), 0);
 			if (sent_bytes == -1) {
 				perror("Error sending message to client");
@@ -118,7 +149,7 @@ void* respond_to_client(void *accepted_client_arg) {
 		}
 
 		send_file_to_client(accepted_client->client_socket_fd, file_path);
-		printf("%hi:: %s %s\n", status_code, method, url_segment);
+		printf("%hi:: %s %s\n", status_code, method, normalized_url_segment);
 	}
 	return NULL;
 }

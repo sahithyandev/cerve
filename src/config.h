@@ -4,4 +4,7 @@
 #define PROJECT_NAME "Cerve"
 #define PROJECT_VERSION "0.0.13"
 
+#define REQUEST_BUFFER_SIZE 5000
+#define RESPONSE_BUFFER_SIZE 1000
+
 #endif
