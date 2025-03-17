@@ -1,6 +1,7 @@
-# Cerve - Serve with a C
+# Cerve - Serve with C
 
-Building a simple HTTP server to learn C.
+It's a simple HTTP server, for local workflows. Completely written in C.
+I have built this as a replacement for the [serve npm package](https://www.npmjs.com/package/serve).
 
 ## Prerequisites
 
