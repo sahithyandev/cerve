@@ -193,7 +193,7 @@ int subcmd_serve(const int PORT) {
 		exit(1);
 	}
 
-	printf("Serving...\nListening on: http://localhost:%d\n", listening_port);
+	printf("HTTP Server started on: http://localhost:%d\n", listening_port);
 	printf("Serving: %s\n", SERVING_DIR);
 
 	while (true) {

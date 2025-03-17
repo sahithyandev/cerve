@@ -7,15 +7,12 @@
 
 #include "./subcmds/help.c"
 #include "./subcmds/serve.c"
-#include "./utils/log_macros.h"
 
-int LOG_LEVEL = LOG_NORMAL;
 char SERVING_DIR[PATH_MAX];
 
 int main(const int argc, char **argv) {
 	int option;
 	struct option long_options[] = {
-		{"verbose", no_argument, 0, 'v'},
 		{"listen", required_argument, 0, 'l'},
 		{0, 0, 0, 0}
 	};
@@ -28,10 +25,6 @@ int main(const int argc, char **argv) {
 			if (port == 0 || port < 1024) {
 				port = 2000;
 			}
-			break;
-		case 'v':
-			LOG_LEVEL = LOG_VERBOSE;
-			printf("Verbose mode enabled.\n");
 			break;
 		default:
 			fprintf(stderr, "Unknown option.\n");
