@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "${{ matrix.artifact_name }}.tar.gz"
-          path: "./build/cerve-${{ matrix.os }}-${{ github.ref_name }}.tar.gz"
+          path: "./build/${{ matrix.artifact_name }}-${{ github.ref_name }}.tar.gz"
 
   create-release:
     runs-on: ubuntu-latest
