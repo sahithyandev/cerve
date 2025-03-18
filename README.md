@@ -28,7 +28,7 @@ You will have to build the binaries yourselves. The instructions are provided be
 `cerve help` will print the subcommands.
 
 ```
-Cerve (0.0.7)
+Cerve (0.1.0)
 Serve with C
 
 USAGE
