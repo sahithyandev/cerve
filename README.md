@@ -12,9 +12,12 @@ Windows binary is not included because cerve is not portable to Windows.
 Here is the installation script. Run this after you have downloaded the binary.
 
 ```shell
-mkdir cerve-v0.0.13
-tar -xf cerve-linux-v0.0.13.tar.gz -C cerve-v0.0.13
-mv cerve-v0.0.13/cerve ~/.local/bin/cerve
+# Extract the tar file
+mkdir cerve-v0.1.0
+tar -xf cerve-linux-v0.1.0.tar.gz -C cerve-v0.1.0
+
+# Add cerve to PATH
+mv cerve-v0.1.0/cerve ~/.local/bin/cerve
 ```
 
 If you are on a older version of Ubuntu or MacOS or on  a different distro, the prebuild binaries might not work.

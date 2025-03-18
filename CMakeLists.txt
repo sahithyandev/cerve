@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31.6)
-project(Cerve VERSION 0.0.13 LANGUAGES C)
+project(Cerve VERSION 0.1.0 LANGUAGES C)
 
 find_program(CLANG_FORMAT "clang-format")
 if (NOT CLANG_FORMAT)
