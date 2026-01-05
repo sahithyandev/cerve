@@ -34,3 +34,17 @@ target_include_directories(cwalk PUBLIC lib/cwalk/include)
 add_executable(cerve src/main.c ${CWALK_SOURCES})
 target_link_libraries(cerve PRIVATE cwalk)
 target_include_directories(cerve PRIVATE "${PROJECT_SOURCE_DIR}/lib/cwalk/include")
+
+find_program(AB_EXECUTABLE NAMES ab apachebench)
+if (NOT AB_EXECUTABLE)
+    message(WARNING "ApacheBench (ab) not found. Benchmarking target will not be available.")
+else()
+    add_custom_target(benchmark
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/benchmark"
+            COMMAND bash "${CMAKE_SOURCE_DIR}/benchmark/benchmark.sh"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/benchmark"
+            COMMENT "Running HTTP server benchmarks with ApacheBench"
+    )
+
+    add_dependencies(benchmark cerve)
+endif()
